@@ -3,7 +3,7 @@
 Este documento describe los flujos funcionales principales de **BitácoraFit** desde la perspectiva del usuario.
 
 ## Roles
-- **Usuario**: El dueño de la bitácora (Mauro). Único actor humano.
+- **Usuario**: El dueño de la bitácora (único actor humano).
 - **Sistema**: El backend, la base de datos y los procesos automáticos.
 - **Agentes IA**: Analista, Coach, Nutricionista.
 
@@ -19,17 +19,17 @@ Este documento describe los flujos funcionales principales de **BitácoraFit** d
 **Criterios de Aceptación:**
 - El formulario carga los datos existentes del día (si los hay) para editar.
 - Validación inmediata de tipos de datos (números positivos).
-- Botón "Guardar" actualiza el `daily_log` (Upsert).
+- Botón "Guardar" actualiza el log diario del día (upsert).
 
 ### US-LOG-02: Registro vía Chat (Lenguaje Natural)
 **Como** usuario,
-**Quiero** escribir actualizaciones rápidas durante el día (ej: "Tomé 500ml de agua", "Caminé 30 mins"),
+**Quiero** escribir actualizaciones rápidas durante el día (ej: "Tomé <ml> ml de agua", "Caminé <minutes> min"),
 **Para** no depender de recordar todo hasta la noche.
 
 **Criterios de Aceptación:**
 - El sistema parsea el mensaje e identifica la intención (sumar agua, setear peso, agregar caminata).
 - Si el mensaje es ambiguo, el sistema pregunta el dato faltante.
-- El sistema responde con el estado actualizado (ej: "Agregado. Total agua: 1.5L").
+- El sistema responde con el estado actualizado (ej: "Agregado. Total agua: <water_l> L").
 - El mensaje original se guarda en `daily_events` para auditoría.
 
 ---
@@ -39,15 +39,15 @@ Este documento describe los flujos funcionales principales de **BitácoraFit** d
 ### US-DASH-01: Ver Resumen del Día
 **Como** usuario,
 **Quiero** ver una tarjeta resumen con mi progreso de hoy vs. los objetivos del plan,
-**Para** saber qué me falta para cumplir (ej: "Faltan 2000 pasos").
+**Para** saber qué me falta para cumplir (ej: "Faltan <steps> pasos").
 
 **Criterios de Aceptación:**
 - Barras de progreso o indicadores visuales para: Proteína, Pasos, Agua, Sueño.
-- Comparación contra los targets definidos en el `plan.yaml` vigente para la fecha.
+- Comparación contra los targets definidos en el `plan.yaml` vigente para la fecha (según revisión vigente con regla effective_from <= date).
 
 ### US-DASH-02: Ver Tendencias de Peso
 **Como** usuario,
-**Quiero** ver un gráfico de mi peso en los últimos 30 días con una línea de tendencia,
+**Quiero** ver un gráfico de mi peso en los últimos <days> días con una línea de tendencia,
 **Para** ignorar las fluctuaciones diarias de agua y enfocarme en la dirección real (bajada/subida).
 
 **Criterios de Aceptación:**
@@ -64,14 +64,14 @@ Este documento describe los flujos funcionales principales de **BitácoraFit** d
 **Para** ajustar mi comportamiento para mañana.
 
 **Criterios de Aceptación:**
-- **Analista**: Muestra un resumen de métricas clave, score de adherencia (0-100) y flags de anomalías (ej: "Sueño bajo 3 días seguidos").
+- **Analista**: Muestra un resumen de métricas clave, score de adherencia (0–100) y flags de anomalías (ej: "Sueño bajo <n_days> días seguidos").
 - **Coach**: Da feedback específico sobre el entrenamiento realizado o sugerencias de descanso si detecta fatiga.
 - **Nutricionista**: Opina sobre la ingesta calórica/proteica y sugiere ajustes para la próxima comida o día.
-- La generación es manual (botón "Generar Informe") o automática a una hora de corte.
+- La generación es manual (botón "Generar Informe") o automática a una hora de corte configurable (UTC).
 
 ### US-AI-02: Consistencia de Personalidad
 **Como** usuario,
-**Quiero** que el Coach sea motivador pero prudente y el Analista sea frío y directo,
+**Quiero** que el Coach sea directo, práctico y prudente (sin juicios) y el Analista sea objetivo y conciso,
 **Para** distinguir claramente qué es un dato duro y qué es una recomendación blanda.
 
 **Criterios de Aceptación:**

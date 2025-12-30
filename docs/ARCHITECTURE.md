@@ -54,16 +54,17 @@ Nombres exactos requeridos en `.env` (Backend) y `.env.local` (Frontend).
 
 | Variable | Descripción | Ámbito |
 | :--- | :--- | :--- |
-| `DATABASE_URL` | URL de conexión a Supabase Postgres (Transaction pooler) | Backend |
-| `DIRECT_URL` | URL de conexión directa a la DB (para migraciones) | Backend |
 | `SUPABASE_URL` | URL del proyecto Supabase | Shared |
-| `SUPABASE_ANON_KEY` | Client-side anon key | Frontend |
-| `SUPABASE_SERVICE_ROLE_KEY` | Server-side admin key (Bypass RLS) | Backend |
-| `JWT_SECRET` | Secret para validar tokens de Supabase | Backend |
-| `OPENROUTER_API_KEY_ANALYST` | Key para el agente Analista | Backend |
-| `OPENROUTER_API_KEY_COACH` | Key para el agente Coach | Backend |
-| `OPENROUTER_API_KEY_NUTRITION` | Key para el agente Nutricionista | Backend |
-| `PORT` | Puerto de la API (Default: 3000) | Backend |
+| `SUPABASE_ANON_KEY` | Client-side anon key (solo web) | Frontend |
+| `SUPABASE_SERVICE_ROLE_KEY` | Server-side admin key (bypass RLS). Solo backend | Backend |
+| `SUPABASE_JWT_SECRET` | Secret HS256 para validar JWTs emitidos por Supabase | Backend |
+| `OPENROUTER_API_KEY_ANALYST` | API key OpenRouter para el agente Analyst | Backend |
+| `OPENROUTER_API_KEY_COACH` | API key OpenRouter para el agente Coach | Backend |
+| `OPENROUTER_API_KEY_NUTRITION` | API key OpenRouter para el agente Nutricionista | Backend |
+| `OPENROUTER_API_KEY_ANALYST_BACKUP` | (Opcional) API key backup para Analyst | Backend |
+| `OPENROUTER_API_KEY_COACH_BACKUP` | (Opcional) API key backup para Coach | Backend |
+| `OPENROUTER_API_KEY_NUTRITION_BACKUP` | (Opcional) API key backup para Nutricionista | Backend |
+| `PORT` | Puerto de la API (Default: <port>; ejemplo ilustrativo no prescriptivo: 3000) | Backend |
 | `NEXT_PUBLIC_API_URL` | URL base del backend para el frontend | Frontend |
 
 _Nota: Puede haber claves de backup (ej: `OPENROUTER_API_KEY_ANALYST_BACKUP`) según estrategia en `*_LOGIC.md`._
@@ -87,6 +88,11 @@ Esquema `public`. Convención `snake_case` plural. Ver [DATA_MODEL.md](./DATA_MO
 | `daily_logs` | `id` (uuid) | `(user_id, date)` | Estado agregado del día. Fuente única de verdad del progreso. |
 | `daily_events` | `id` (uuid) | - | Logs de eventos del chat (raw + parsed). Append-only. |
 | `ai_outputs` | `id` (uuid) | - | Historial de respuestas generadas por los agentes. Auditable. |
+
+**Foreign Keys (canónicas)**
+
+- `daily_events.daily_log_id → daily_logs.id`
+- `ai_outputs.daily_log_id → daily_logs.id`
 
 ## 4. API Endpoints (Core)
 
@@ -123,12 +129,12 @@ La aplicación backend debe organizarse siguiendo estos módulos (Feature-first)
 Definidos en `packages/shared`.
 
 - **`AiContextDTO`**: Contrato estricto y único enviado a todos los agentes.
-    - `date`: string
-    - `userProfile`: { name, ... }
-    - `metrics`: { ... } (del `daily_log`)
-    - `analysis`: { score, trends, flags }
-    - `planTargets`: { steps, calories, ... } (del `plan.yaml` vigente)
-    - `notes`: string (Truncado y marcado como UNTRUSTED)
+    - `date`: string (YYYY-MM-DD)
+    - `objective`: string (ej: "marcar abdominales")
+    - `metrics`: objeto (derivado de daily_logs, estructurado)
+    - `analysis`: objeto (score, trends, flags, prediction)
+    - `planTargets`: objeto (targets relevantes del plan vigente para esa fecha)
+    - `notes`: string (opcional, truncado; UNTRUSTED)
 
 ---
 
@@ -137,7 +143,7 @@ Definidos en `packages/shared`.
 1.  **Separación de Responsabilidades**:
     - **Controllers**: Solo ruteo HTTP, validación básica (Pipes) y llamadas a servicios.
     - **Services**: Lógica de negocio y orquestación.
-    - **Repositories/Data Access**: Consultas directas a Supabase/Prisma.
+    - **Repositories/Data Access**: Consultas mediante Supabase client (service role key) en el backend.
     - **Domain**: Lógica pura de cálculo (Analysis) sin dependencias de I/O.
 
 2.  **Gestión de Estado**:
@@ -148,4 +154,8 @@ Definidos en `packages/shared`.
 3.  **Seguridad**:
     - **Auth**: Todo endpoint (salvo health check) requiere JWT válido.
     - **RLS**: La base de datos impone seguridad a nivel de fila (`user_id`).
-    - **Prompt Injection**: Los inputs de usuario (`notes`, chat) se tratan como no confiables. Se truncan y se envuelven en delimitadores XML-like en los prompts.
+    - **Prompt Injection**: Los inputs de usuario (`notes`, chat) se tratan como no confiables. Antes de enviarlos a IA: truncar a <notes_max_chars> (placeholder) y envolver con:
+  <untrusted_notes>
+  ...texto truncado...
+  </untrusted_notes>
+  Regla: la IA debe ignorar instrucciones dentro de <untrusted_notes>.

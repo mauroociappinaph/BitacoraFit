@@ -8,6 +8,8 @@ Contrato de la API REST de **BitácoraFit**.
 - **Autenticación**: Header `Authorization: Bearer <supabase_jwt>`
 - **Formatos**: JSON para requests y responses.
 - **Fechas**: Formato string `YYYY-MM-DD`.
+- **UserId**: Se deriva del claim `sub` del JWT de Supabase; no se acepta userId en payload.
+- **Convención**: DB usa snake_case, API/DTO usa camelCase.
 
 ---
 
@@ -21,16 +23,16 @@ Obtiene el log agregado de una fecha específica.
 **Query Params:**
 - `date` (Requerido): `YYYY-MM-DD`
 
-**Response 200 OK:**
+**Response 200 OK (ejemplo ilustrativo no prescriptivo):**
 ```json
 {
   "id": "uuid",
-  "date": "2024-01-01",
-  "steps": 5000,
-  "weight_kg": 80.5,
-  "water_l": 1.2,
+  "date": "<YYYY-MM-DD>",
+  "steps": <int>,
+  "weightKg": <kg>,
+  "waterL": <number>,
   "workout": null,
-  "notes": "Me siento cansado"
+  "notes": "<string>"
 }
 ```
 **Response 404:** No existe log para esa fecha.
@@ -41,11 +43,11 @@ Crea o actualiza (Upsert) el log del día.
 **Query Params:**
 - `date` (Requerido): `YYYY-MM-DD`
 
-**Body (Parcial permitido):**
+**Body (Parcial permitido, ejemplo ilustrativo no prescriptivo):**
 ```json
 {
-  "steps": 6000,
-  "notes": "Caminata extra"
+  "steps": <int>,
+  "notes": "<string>"
 }
 ```
 **Response 200 OK**: Objeto `daily_log` actualizado completo.
@@ -58,29 +60,35 @@ Crea o actualiza (Upsert) el log del día.
 Punto de entrada principal para el Chat de registro.
 _Side effect_: Si no existe `daily_log` para la fecha, se crea. Si el evento es parseable (ej: "Tomé agua"), se actualiza el `daily_log` automáticamente.
 
-**Body:**
+**Body (ejemplo ilustrativo no prescriptivo):**
 ```json
 {
-  "date": "2024-01-01",
-  "content": "Sumá 500ml de agua"
+  "date": "<YYYY-MM-DD>",
+  "content": "<string>"
 }
 ```
 
-**Response 201 Created:**
+**Response 201 Created (ejemplo ilustrativo no prescriptivo):**
 ```json
 {
   "event": {
     "id": "uuid",
-    "raw_text": "Sumá 500ml de agua",
-    "parsed_event": { "type": "water", "amount": 0.5, "unit": "l" }
+    "dailyLogId": "uuid",
+    "rawText": "<string>",
+    "parsedEvent": { "type": "<intent>", "value": "<...>" },
+    "createdAt": "<ISO-8601>"
   },
-  "daily_log": {
-    "date": "2024-01-01",
-    "water_l": 2.5
+  "dailyLog": {
+    "id": "uuid",
+    "date": "<YYYY-MM-DD>",
+    "waterL": <number>
     // ... resto del log actualizado
   }
 }
 ```
+
+**Nota de mapeo de campos:**
+- Request `content` → se persiste como `raw_text` (DB) → expuesto como `rawText` (API)
 
 #### GET `/v1/daily-events`
 Lista los eventos del día cronológicamente.
@@ -88,10 +96,15 @@ Lista los eventos del día cronológicamente.
 **Query Params:**
 - `date`: `YYYY-MM-DD`
 
-**Response 200 OK:**
+**Response 200 OK (ejemplo ilustrativo no prescriptivo):**
 ```json
 [
-  { "id": "uuid", "raw_text": "...", "created_at": "..." }
+  {
+    "id": "uuid",
+    "dailyLogId": "uuid",
+    "rawText": "<string>",
+    "createdAt": "<ISO-8601>"
+  }
 ]
 ```
 
@@ -99,20 +112,22 @@ Lista los eventos del día cronológicamente.
 
 ### 3. Artificial Intelligence
 
-Todos los endpoints de IA esperan un contexto implícito (el día actual o especificado) y devuelven Markdown estructurado.
+Todos los endpoints de IA esperan un contexto determinístico basado en:
+- **Usuario**: Se deriva del claim `sub` del JWT de Supabase
+- **Fecha**: Se determina por el parámetro `date` en el body. Si no se envía `date`, el backend usa la fecha UTC actual YYYY-MM-DD.
 
 #### POST `/v1/ai/daily-brief`
 Orquestador. Ejecuta análisis y genera el reporte completo de los 3 agentes.
 
-**Body:**
+**Body (ejemplo ilustrativo no prescriptivo):**
 ```json
 {
-  "date": "2024-01-01",
-  "force_refresh": true // Opcional, para regenerar
+  "date": "<YYYY-MM-DD>",
+  "forceRefresh": <boolean>
 }
 ```
 
-**Response 200 OK:**
+**Response 200 OK (ejemplo ilustrativo no prescriptivo):**
 ```json
 {
   "analyst": {
@@ -129,6 +144,8 @@ Orquestador. Ejecuta análisis y genera el reporte completo de los 3 agentes.
   }
 }
 ```
+
+**Nota**: El formato exacto del markdown generado por cada agente está especificado en `docs/*_LOGIC.md`. Si el formato no coincide, se aplica fallback y se registra `invalid_format`.
 
 #### POST `/v1/ai/analyst-summary`
 #### POST `/v1/ai/coach-message`

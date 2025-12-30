@@ -7,13 +7,13 @@ Fases de implementación planificadas para **BitácoraFit**.
 
 - [ ] Setup Monorepo (Next + Nest + Shared).
 - [ ] Configuración de Supabase (Auth + Tablas Core).
-- [ ] Endpoint `PUT /daily-logs` y Formulario Web Básico.
-- [ ] Despliegue inicial (Vercel + Railway/Render).
+- [ ] Endpoint `PUT /v1/daily-logs` y Formulario Web Básico.
+- [ ] Despliegue inicial (Vercel + (Railway/Fly.io/Render)).
 
 ## Fase 2: Análisis Determinístico & Chat
 **Objetivo**: Feedback visual inmediato y reducción de fricción.
 
-- [ ] Implementación de `ANALYSIS_LOGIC.md` (Tendencias, Scores).
+- [ ] Implementación de la lógica determinística definida en `ANALYSIS_LOGIC.md` (Tendencias, Scores).
 - [ ] Chat UI + Parsing Básico (Reglas Regex).
 - [ ] Dashboard con gráficos de Recharts.
 
@@ -21,15 +21,15 @@ Fases de implementación planificadas para **BitácoraFit**.
 **Objetivo**: Feedback cualitativo personalizado.
 
 - [ ] Integración OpenRouter (NestJS).
-- [ ] Orquestador `/ai/daily-brief`.
+- [ ] Orquestador `POST /v1/ai/daily-brief`.
 - [ ] Implementación de Personas (Analista, Coach, Nutricionista).
 - [ ] Tests de Prompts.
 
 ## Fase 4: Refinamiento & Automatización
 **Objetivo**: Usabilidad avanzada.
 
-- [ ] Cron Jobs para alertas automáticas si falta data.
-- [ ] Mejoras en el Parser del Chat (NLP más robusto).
+- [ ] Cron Jobs internos para alertas automáticas si falta data (no endpoints públicos).
+- [ ] Mejoras en el Parser del Chat (v2 NLP más robusto, manteniendo fallback determinístico).
 - [ ] PWA Support (Instalable en móvil).
 - [ ] Plan Versioning UI (Editor visual de `plan.yaml`).
 

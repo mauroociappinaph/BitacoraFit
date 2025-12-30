@@ -9,6 +9,7 @@ Debe mantenerse consistente con la [Canonical Reference](./ARCHITECTURE.md).
 - **Primary Keys**: `id` uuid (default: `gen_random_uuid()`).
 - **Foreign Keys**: `referencia_id`.
 - **Timestamps**: `created_at` (default `now()`), `updated_at`.
+- **Defaults numéricos**: Forman parte del diseño del esquema (no son recomendaciones).
 
 ---
 
@@ -29,8 +30,8 @@ Estado agregado del día. Fuente única de verdad para el análisis.
 | `sleep_hours` | `numeric(3,1)` | Nullable | Horas de sueño |
 | `calories_in` | `int` | Default 0 | Calorías consumidas |
 | `protein_g` | `int` | Default 0 | Proteínas (gramos) |
-| `workout` | `jsonb` | Default `null` | Estructura: `{ type, completed, calories, minutes }` |
-| `walk` | `jsonb` | Default `null` | Estructura: `{ minutes, calories, distance_km }` |
+| `workout` | `jsonb` | Default `null` | Estructura: `{ type, completed, calories_burned, avg_bpm, minutes }` (campos opcionales según aplique) |
+| `walk` | `jsonb` | Default `null` | Estructura: `{ minutes, calories_burned, avg_bpm, distance_km }` (campos opcionales según aplique) |
 | `notes` | `text` | Default `""` | Notas del usuario (Untrusted) |
 | `created_at` | `timestamptz` | Default `now()` | |
 | `updated_at` | `timestamptz` | Default `now()` | |
@@ -40,6 +41,7 @@ Estado agregado del día. Fuente única de verdad para el análisis.
 
 ### 2. `daily_events`
 Event logs append-only derivados del chat o acciones del usuario. Usado para "reconstruir" o auditar el día.
+**Nota**: En tablas append-only no usamos `updated_at`.
 
 | Columna | Tipo | Constraints | Descripción |
 | :--- | :--- | :--- | :--- |
@@ -56,13 +58,14 @@ Event logs append-only derivados del chat o acciones del usuario. Usado para "re
 
 ### 3. `ai_outputs`
 Historial de respuestas generadas por los agentes. Trazabilidad y mejora continua.
+**Nota**: En tablas append-only no usamos `updated_at`.
 
 | Columna | Tipo | Constraints | Descripción |
 | :--- | :--- | :--- | :--- |
 | `id` | `uuid` | PK, Default `gen_random_uuid()` | |
 | `daily_log_id`| `uuid` | FK -> `daily_logs.id` | Contexto de la respuesta |
 | `agent` | `text` | Not Null | `analyst`, `coach`, `nutrition` |
-| `model` | `text` | Not Null | Modelo usado (ej: `google/gemma-3-12b`) |
+| `model` | `text` | Not Null | Modelo usado (string exacto del modelo OpenRouter) |
 | `content` | `text` | Not Null | Respuesta en Markdown |
 | `tokens` | `int` | Nullable | Tokens consumidos (aprox) |
 | `is_valid` | `boolean` | Default `true` | Flag por si falla validación de formato |
@@ -84,13 +87,15 @@ PostgreSQL debe tener RLS habilitado en todas las tablas.
 
 **`daily_events`**
 - `SELECT`: `daily_log_id IN (SELECT id FROM daily_logs WHERE user_id = auth.uid())`
-- `INSERT`: (Solo via Backend con Service Role, o verificar link con `daily_logs` propiedad del usuario) -> *Recomendación*: Insertar siempre desde Backend api layer. Frontend lee.
+- `INSERT`: Solo desde Backend usando Service Role. El backend valida ownership por JWT (sub) antes de insertar.
 
 **`ai_outputs`**
 - `SELECT`: `daily_log_id IN (SELECT id FROM daily_logs WHERE user_id = auth.uid())`
 - `INSERT`: Solo Backend (Service Role). No permitir insert desde anon/authenticated roles directos.
 
 ## Migraciones (Snippets Ilustrativos)
+
+**Nota**: Snippet ilustrativo (no prescriptivo), incompleto: muestra estructura y constraints clave.
 
 ```sql
 -- Ejemplo de creación de daily_logs

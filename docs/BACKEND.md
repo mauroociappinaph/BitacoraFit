@@ -4,9 +4,9 @@ Guía de implementación para `apps/api`.
 
 ## Stack
 
-- **Framework**: NestJS (Express o Fastify).
+- **Framework**: NestJS (Express).
 - **Lenguaje**: TypeScript Strict.
-- **Validación**: `zod` + `nestjs-zod` (recomendado) o `class-validator`.
+- **Validación**: `zod` + `nestjs-zod` (única validación).
 - **Docs**: Swagger (`@nestjs/swagger`).
 - **Logs**: Pino (JSON logs).
 
@@ -20,13 +20,29 @@ src/
 ├── main.ts
 ├── common/               # Guards, Interceptors, Filters, Pipes
 └── modules/
-    ├── logs/
+    ├── auth/             # Auth Guard, JWT Strategy
+    │   ├── auth.module.ts
+    │   └── jwt.strategy.ts
+    ├── logs/             # Manejo de daily_logs y CRUD
     │   ├── logs.controller.ts  # HTTP
     │   ├── logs.service.ts     # Business Logic
     │   ├── logs.repository.ts  # Database access
     │   └── logs.module.ts
-    ├── analysis/         # Lógica pura (sin DB dependencies directas, recibe DTOs)
-    └── ai/               # OpenRouter Integration
+    ├── events/           # Manejo de daily_events y Parsing
+    │   ├── events.controller.ts
+    │   ├── events.service.ts
+    │   ├── events.repository.ts
+    │   └── events.module.ts
+    ├── plan/             # Lectura y parsing de plan.yaml
+    │   ├── plan.service.ts
+    │   └── plan.module.ts
+    ├── analysis/         # Motor determinístico, lógica pura
+    │   ├── analysis.service.ts
+    │   └── analysis.module.ts
+    └── ai/               # Servicios de OpenRouter, Prompts, Orquestación
+        ├── ai.controller.ts
+        ├── ai.service.ts
+        └── ai.module.ts
 ```
 
 ## Reglas de Implementación
@@ -41,7 +57,7 @@ src/
     - "Si el log no existe, créalo, luego llama al análisis, luego guarda".
 
 3.  **Repositories**:
-    - Abstraen Supabase/Prisma.
+    - Abstraen Supabase client (service role key).
     - "Buscar log por fecha y usuario".
 
 4.  **Domain (Analysis)**:
@@ -52,9 +68,9 @@ src/
 
 - **Variables de Entorno**: Usar `@nestjs/config` para cargar y validar `.env` al inicio. Fallar rápido si falta `OPENROUTER_API_KEY_*`.
 - **Cors**: Configurar restringido al dominio del frontend en producción.
-- **Rate Limiting**: Usar `@nestjs/throttler`.
-    - Global: 100 req/min.
-    - AI Endpoints: 10 req/min (para cuidar costos/cuota).
+- **Rate Limiting**: Usar `@nestjs/throttler` con configuración por ENV.
+    - Global: <global_rate_limit> req/min (configurable por ENV).
+    - AI Endpoints: <ai_rate_limit> req/min (configurable por ENV, para cuidar costos/cuota).
 
 ## Logging
 
@@ -65,9 +81,3 @@ Loguear errores con stack trace y contexto (UserID, RequestID).
 
 - **Unit**: Jest (`.spec.ts`). Obligatorio para `AnalysisModule`.
 - **E2E**: Supertest. Obligatorio para endpoints críticos (`/daily-logs`, `/ai/daily-brief`).
-
-## Cron Jobs (Fase 4)
-
-- **Endpoint**: `/cron/missing-data-alert`
-- **Frecuencia**: Diaria a las 20:00
-- **Propósito**: Alertar al usuario si faltan datos del día

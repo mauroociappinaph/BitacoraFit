@@ -9,27 +9,27 @@ El archivo contiene una lista de revisiones del plan, ordenadas cronológicament
 
 ```yaml
 plans:
-  - effective_from: "2024-01-01"
+  - effective_from: "<YYYY-MM-DD>"
     name: "Fase 1: Mantenimiento activo"
     targets:
-      daily_steps: <int> # Ejemplo: 8000 (no prescriptivo)
-      daily_water_l: <number> # Ejemplo: 2.5
-      daily_protein_g: <int> # Ejemplo: 160
-      sleep_hours: <number> # Ejemplo: 7.5
-      calories_target: <int> # Ejemplo: 2400
+      daily_steps: <int> # Ejemplo ilustrativo (no prescriptivo)
+      daily_water_l: <number> # Ejemplo ilustrativo (no prescriptivo)
+      daily_protein_g: <int> # Ejemplo ilustrativo (no prescriptivo)
+      sleep_hours: <number> # Ejemplo ilustrativo (no prescriptivo)
+      calories_target: <int> # Ejemplo ilustrativo (no prescriptivo)
     workout_schedule:
       monday: "Push + Caminata"
       tuesday: "Caminata Larga"
       # ... resto de la semana
 
-  - effective_from: "2024-03-01"
+  - effective_from: "<YYYY-MM-DD>"
     name: "Fase 2: Cutting agresivo"
     targets:
-      daily_steps: <int> # Ejemplo: 10000
+      daily_steps: <int> # Ejemplo ilustrativo (no prescriptivo)
       # ... targets actualizados
 ```
 
-> **Nota**: Los valores numéricos anteriores son _ejemplos ilustrativos_. No deben usarse como prescripción médica real. El usuario debe editar su `plan.yaml` con sus propios objetivos.
+> **Nota**: Los valores numéricos anteriores son _ejemplos ilustrativos (no prescriptivos)_. No deben usarse como prescripción médica real. El usuario debe editar su `plan.yaml` con sus propios objetivos.
 
 ## Lógica de Selección ("Plan Vigente")
 
@@ -37,6 +37,15 @@ Para cualquier fecha `D` dada, el sistema debe seleccionar la revisión `P` tal 
 
 1.  `P.effective_from <= D`
 2.  `P.effective_from` sea la fecha más cercana posible a `D` (la más reciente del pasado).
+
+**Ventana de análisis**: Últimos <TREND_WINDOW_DAYS> días (configurable por ENV).
+**Ejemplo ilustrativo (no prescriptivo)**: 14 o 30.
+
+**Mantenimiento de peso**: entre -<trend_band_kg_per_week> y +<trend_band_kg_per_week>.
+
+**Pesos de adherence**: <WEIGHT_STEPS>, <WEIGHT_PROTEIN>, <WEIGHT_WATER>, <WEIGHT_SLEEP> (suman 1.0).
+
+**MISSING_DATA**: faltan > <missing_metrics_threshold> métricas principales.
 
 **Algoritmo (Pseudocódigo):**
 
