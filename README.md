@@ -1,6 +1,6 @@
 # BitácoraFit
 
-**BitácoraFit** es una aplicación web personal de seguimiento fitness integral ("holística") que combina un registro diario detallado, visualización de datos (dashboard) y un equipo de asistentes de IA especializados (Coach, Nutricionista, Analista) para optimizar el rendimiento y el bienestar.
+**BitácoraFit** es una aplicación web personal de seguimiento fitness integral que combina un registro diario detallado, visualización de datos (dashboard) y un equipo de asistentes de IA especializados (Coach, Nutricionista, Analyst) para optimizar el rendimiento y el bienestar.
 
 ## Visión General
 
@@ -14,7 +14,7 @@ El propósito de BitácoraFit es permitir un registro sin fricción (vía chat o
 La arquitectura es un **Monorepo** gestionado con `pnpm` (workspaces).
 
 - **Frontend**: [Next.js](https://nextjs.org) (App Router), TypeScript, Tailwind CSS, Recharts.
-- **Backend**: [NestJS](https://nestjs.com) (REST API), TypeScript, Fastify (opcional) o Express.
+- **Backend**: [NestJS](https://nestjs.com) (REST API), TypeScript, Express (con soporte opcional para Fastify).
 - **Base de Datos**: [Supabase](https://supabase.com) (PostgreSQL + Auth + RLS).
 - **IA**: [OpenRouter](https://openrouter.ai) (acceso unificado a modelos LLM).
 - **Paquete de Gestión**: `pnpm` (Recomendado).
@@ -29,7 +29,7 @@ La arquitectura es un **Monorepo** gestionado con `pnpm` (workspaces).
 ├── packages/
 │   ├── shared/       # DTOs, Types, Zod Schemas, Constants (Shared logic)
 ├── docs/             # Documentación de arquitectura (Source of Truth)
-├── plan.yaml         # Fuente de la verdad del plan fitness (Versionado)
+├── plan.yaml         # Fuente de la verdad del plan fitness (referenciado; no incluido en esta entrega de docs)
 └── README.md         # Este archivo
 ```
 
@@ -37,25 +37,25 @@ La arquitectura es un **Monorepo** gestionado con `pnpm` (workspaces).
 
 La documentación se divide en archivos especializados para mantener la claridad y la separación de preocupaciones.
 
-- **[USER_STORIES.md](./USER_STORIES.md)**: Historias de usuario y flujos principales.
-- **[ARCHITECTURE.md](./ARCHITECTURE.md)**: **Canonical Reference** (Variables de entorno, Endpoints, Tablas, Módulos). Diseño de alto nivel.
-- **[DATA_MODEL.md](./DATA_MODEL.md)**: Esquema de base de datos, RLS y definiciones de tablas.
-- **[API.md](./API.md)**: Contrato de API REST, payloads y seguridad.
+- **[USER_STORIES.md](./docs/USER_STORIES.md)**: Historias de usuario y flujos principales.
+- **[ARCHITECTURE.md](./docs/ARCHITECTURE.md)**: **Canonical Reference** (Variables de entorno, Endpoints, Tablas, Módulos). Diseño de alto nivel.
+- **[DATA_MODEL.md](./docs/DATA_MODEL.md)**: Esquema de base de datos, RLS y definiciones de tablas.
+- **[API.md](./docs/API.md)**: Contrato de API REST, payloads y seguridad.
 
 ### Lógica y Negocio
-- **[PLAN_VERSIONING.md](./PLAN_VERSIONING.md)**: Estructura y reglas del `plan.yaml`.
-- **[ANALYSIS_LOGIC.md](./ANALYSIS_LOGIC.md)**: Fórmulas determinísticas, cálculo de tendencias y scores.
+- **[PLAN_VERSIONING.md](./docs/PLAN_VERSIONING.md)**: Estructura y reglas del `plan.yaml`.
+- **[ANALYSIS_LOGIC.md](./docs/ANALYSIS_LOGIC.md)**: Fórmulas determinísticas, cálculo de tendencias y scores.
 
 ### Inteligencia Artificial (Personas)
-- **[ANALYST_LOGIC.md](./ANALYST_LOGIC.md)**: Lógica y prompts para el Analista (Resumen objetivo).
-- **[COACH_LOGIC.md](./COACH_LOGIC.md)**: Lógica y prompts para el Coach (Entrenamiento).
-- **[NUTRITION_LOGIC.md](./NUTRITION_LOGIC.md)**: Lógica y prompts para el Nutricionista.
+- **[ANALYST_LOGIC.md](./docs/ANALYST_LOGIC.md)**: Lógica y prompts para el Analyst (Resumen objetivo).
+- **[COACH_LOGIC.md](./docs/COACH_LOGIC.md)**: Lógica y prompts para el Coach (Entrenamiento).
+- **[NUTRITION_LOGIC.md](./docs/NUTRITION_LOGIC.md)**: Lógica y prompts para el Nutricionista.
 
 ### Guías de Implementación
-- **[FRONTEND.md](./FRONTEND.md)**: Guía de desarrollo UI y cliente.
-- **[BACKEND.md](./BACKEND.md)**: Guía de arquitectura NestJS y capas.
-- **[CONTRIBUTING.md](./CONTRIBUTING.md)**: Flujos de CI/CD, Git, y estándares de calidad.
-- **[ROADMAP.md](./ROADMAP.md)**: Fases del proyecto y mejoras futuras.
+- **[FRONTEND.md](./docs/FRONTEND.md)**: Guía de desarrollo UI y cliente.
+- **[BACKEND.md](./docs/BACKEND.md)**: Guía de arquitectura NestJS y capas.
+- **[CONTRIBUTING.md](./docs/CONTRIBUTING.md)**: Flujos de CI/CD, Git, y estándares de calidad.
+- **[ROADMAP.md](./docs/ROADMAP.md)**: Fases del proyecto y mejoras futuras.
 
 ## Restricciones Clave
 

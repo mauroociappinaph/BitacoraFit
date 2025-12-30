@@ -65,3 +65,9 @@ Loguear errores con stack trace y contexto (UserID, RequestID).
 
 - **Unit**: Jest (`.spec.ts`). Obligatorio para `AnalysisModule`.
 - **E2E**: Supertest. Obligatorio para endpoints críticos (`/daily-logs`, `/ai/daily-brief`).
+
+## Cron Jobs (Fase 4)
+
+- **Endpoint**: `/cron/missing-data-alert`
+- **Frecuencia**: Diaria a las 20:00
+- **Propósito**: Alertar al usuario si faltan datos del día
