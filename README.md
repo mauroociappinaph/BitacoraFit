@@ -1,69 +1,112 @@
 # BitácoraFit
 
-**BitácoraFit** es una aplicación web personal de seguimiento fitness integral que combina un registro diario detallado, visualización de datos (dashboard) y un equipo de asistentes de IA especializados (Coach, Nutricionista, Analyst) para optimizar el rendimiento y el bienestar.
+**BitácoraFit** es una aplicación integral para el seguimiento de la salud y el fitness, diseñada para ayudar a los usuarios a registrar sus métricas diarias, visualizar su progreso y recibir feedback personalizado de asistentes de IA (Analista, Coach, Nutricionista). La aplicación se enfoca en proporcionar datos duros y recomendaciones accionables para ajustar el comportamiento del usuario hacia sus objetivos de bienestar.
 
-## Visión General
+## Visión General del Proyecto
 
-El propósito de BitácoraFit es permitir un registro sin fricción (vía chat o formulario) de métricas diarias y ofrecer feedback determinístico y basado en IA que sea:
-- **Objetivo y neutral**: Sin juicios morales.
-- **Contextual**: Basado en un plan versionado y la realidad del día.
-- **Privado**: Datos propiedad del usuario.
+Este proyecto es una aplicación web full-stack implementada como un monorepo, utilizando Next.js para el frontend, NestJS para el backend, Supabase como base de datos y autenticación, y OpenRouter para la integración con modelos de inteligencia artificial.
 
-## Stack Tecnológico
+## Arquitectura de Alto Nivel
 
-La arquitectura es un **Monorepo** gestionado con `pnpm` (workspaces).
+El sistema se compone de un frontend (Next.js), un backend (NestJS) y servicios externos (Supabase, OpenRouter).
 
-- **Frontend**: [Next.js](https://nextjs.org) (App Router), TypeScript, Tailwind CSS, Recharts.
-- **Backend**: [NestJS](https://nestjs.com) (REST API), TypeScript, Express (con soporte opcional para Fastify).
-- **Base de Datos**: [Supabase](https://supabase.com) (PostgreSQL + Auth + RLS).
-- **IA**: [OpenRouter](https://openrouter.ai) (acceso unificado a modelos LLM).
-- **Paquete de Gestión**: `pnpm` (Recomendado).
+```mermaid
+graph TD
+    User((Usuario))
 
-## Estructura del Proyecto (Monorepo)
+    subgraph "Frontend (Next.js)"
+        UI[App Router UI]
+        Chat[Chat Component]
+        Dashboard[Dashboard Viz]
+    end
 
-```text
-/
-├── apps/
-│   ├── web/          # Next.js App Router (UI, Auth, Dashboard, Chat)
-│   ├── api/          # NestJS (REST API, Cron Jobs, Validations)
-├── packages/
-│   ├── shared/       # DTOs, Types, Zod Schemas, Constants (Shared logic)
-├── docs/             # Documentación de arquitectura (Source of Truth)
-├── plan.yaml         # Fuente de la verdad del plan fitness (referenciado; no incluido en esta entrega de docs)
-└── README.md         # Este archivo
+    subgraph "Backend (NestJS)"
+        API[API Gateway / Controllers]
+        Auth[Auth Guard (Supabase)]
+        Logic[Service Layer]
+        Analysis[Analysis Engine (Deterministic)]
+        AI_Orch[AI Orchestrator]
+    end
+
+    subgraph "Infrastructure / External"
+        DB[(Supabase Postgres)]
+        OR[OpenRouter API]
+        Plan[plan.yaml (Repo)]
+    end
+
+    User --> UI
+    UI --> API
+    Chat --> API
+
+    API --> Auth
+    Auth --> Logic
+
+    Logic --> DB
+    Logic --> Analysis
+    Logic --> Plan
+
+    AI_Orch --> Analysis
+    AI_Orch --> DB
+    AI_Orch --> OR
 ```
 
-## Documentación (Índice)
+### Principios de Arquitectura
 
-La documentación se divide en archivos especializados para mantener la claridad y la separación de preocupaciones.
+1.  **Separación de Responsabilidades**: Controllers delgados, lógica de negocio en Services, acceso a datos en Repositories, lógica pura en Domain.
+2.  **Gestión de Estado**: El estado del día se recalcula o actualiza incrementalmente. `daily_logs` es la proyección actual, `daily_events` es el "event sourcing" liviano.
+3.  **Seguridad**: Autenticación JWT en todos los endpoints protegidos, RLS en la base de datos y manejo de Prompt Injection.
 
-- **[USER_STORIES.md](./docs/USER_STORIES.md)**: Historias de usuario y flujos principales.
-- **[ARCHITECTURE.md](./docs/ARCHITECTURE.md)**: **Canonical Reference** (Variables de entorno, Endpoints, Tablas, Módulos). Diseño de alto nivel.
-- **[DATA_MODEL.md](./docs/DATA_MODEL.md)**: Esquema de base de datos, RLS y definiciones de tablas.
-- **[API.md](./docs/API.md)**: Contrato de API REST, payloads y seguridad.
+## Fases del Roadmap
 
-### Lógica y Negocio
-- **[PLAN_VERSIONING.md](./docs/PLAN_VERSIONING.md)**: Estructura y reglas del `plan.yaml`.
-- **[ANALYSIS_LOGIC.md](./docs/ANALYSIS_LOGIC.md)**: Fórmulas determinísticas, cálculo de tendencias y scores.
+El desarrollo de BitácoraFit se divide en las siguientes fases:
 
-### Inteligencia Artificial (Personas)
-- **[ANALYST_LOGIC.md](./docs/ANALYST_LOGIC.md)**: Lógica y prompts para el Analyst (Resumen objetivo).
-- **[COACH_LOGIC.md](./docs/COACH_LOGIC.md)**: Lógica y prompts para el Coach (Entrenamiento).
-- **[NUTRITION_LOGIC.md](./docs/NUTRITION_LOGIC.md)**: Lógica y prompts para el Nutricionista.
+*   **Fase 1: MVP (Minimum Viable Product)**: Registro de datos y almacenamiento seguro (Setup Monorepo, Supabase, `PUT /v1/daily-logs`, Despliegue inicial).
+*   **Fase 2: Análisis Determinístico & Chat**: Feedback visual inmediato y reducción de fricción (Lógica determinística, Chat UI + Parsing Básico, Dashboard con gráficos).
+*   **Fase 3: Inteligencia Artificial**: Feedback cualitativo personalizado (Integración OpenRouter, Orquestador AI, Personas de IA, Tests de Prompts).
+*   **Fase 4: Refinamiento & Automatización**: Usabilidad avanzada (Cron Jobs, Parser Chat v2, PWA Support, Plan Versioning UI).
 
-### Guías de Implementación
-- **[FRONTEND.md](./docs/FRONTEND.md)**: Guía de desarrollo UI y cliente.
-- **[BACKEND.md](./docs/BACKEND.md)**: Guía de arquitectura NestJS y capas.
-- **[CONTRIBUTING.md](./docs/CONTRIBUTING.md)**: Flujos de CI/CD, Git, y estándares de calidad.
-- **[ROADMAP.md](./docs/ROADMAP.md)**: Fases del proyecto y mejoras futuras.
+## Historias de Usuario Clave
 
-## Restricciones Clave
+BitácoraFit se centra en estas funcionalidades principales para el usuario:
 
-1.  **Code Size**: Ningún archivo fuente (`.ts`, `.tsx`, `.js`) debe superar las **300 líneas**. Refactorizar si se acerca a este límite.
-2.  **Modularización**: Feature-first. Módulos autocontenidos (ej: `modules/logs/`) antes que capas horizontales puras.
-3.  **Números en Docs**: Usar placeholders (`<int>`, `<kg>`) para valores no estructurales. Números permitidos solo como ejemplos ilustrativos.
-4.  **IA Neutra**: Todas las salidas de IA deben ser en **Español Rioplatense**, objetivas, sin juicios y sin diagnósticos médicos.
+*   **Registro Diario**:
+    *   **US-LOG-01**: Registro de métricas vía formulario web estructurado para precisión.
+    *   **US-LOG-02**: Registro rápido vía chat con lenguaje natural, con parsing inteligente de eventos.
+*   **Visualización y Análisis (Dashboard)**:
+    *   **US-DASH-01**: Resumen diario del progreso vs. objetivos.
+    *   **US-DASH-02**: Gráfico de tendencias de peso para un enfoque a largo plazo.
+*   **Feedback de Inteligencia Artificial**:
+    *   **US-AI-01**: Reporte consolidado diario con opiniones de Analista, Coach y Nutricionista.
+    *   **US-AI-02**: Consistencia de personalidad en las respuestas de los agentes de IA.
+*   **Gestión del Plan**:
+    *   **US-PLAN-01**: El sistema adapta sus objetivos basándose en cambios en el archivo `plan.yaml`.
 
-## CI/CD (Estrategia)
+## Tecnologías Utilizadas
 
-Ver [CONTRIBUTING.md](./CONTRIBUTING.md) para detalles completos. Se utiliza GitHub Actions para validación continua de PRs (Lint, Test, Typecheck).
+*   **Monorepo**: pnpm
+*   **Frontend**: Next.js 14+ (App Router), React, TypeScript, Tailwind CSS, Recharts, Axios.
+*   **Backend**: NestJS (Express), TypeScript, Zod + nestjs-zod, Swagger, Pino Logger.
+*   **Base de Datos**: Supabase (Postgres, Auth, RLS).
+*   **Inteligencia Artificial**: OpenRouter (para acceso a diversos modelos de IA).
+*   **Control de Versiones**: Git, Conventional Commits, Husky.
+
+## Estructura del Monorepo
+
+El proyecto está organizado en un monorepo gestionado por pnpm, con la siguiente estructura principal:
+
+*   `apps/`: Contiene las aplicaciones principales.
+    *   `api/`: Aplicación backend (NestJS).
+    *   `web/`: Aplicación frontend (Next.js).
+*   `packages/`: Contiene paquetes compartidos entre las aplicaciones.
+    *   `shared/`: Tipos, utilidades y constantes compartidas (TypeScript).
+*   `docs/`: Documentación del proyecto.
+
+## Configuración y Variables de Entorno
+
+Las variables de entorno son cruciales para la configuración del proyecto y se gestionan a través de archivos `.env` (local) y GitHub Secrets (CI/CD). Algunas variables clave incluyen:
+
+*   `SUPABASE_URL`, `SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY`, `SUPABASE_JWT_SECRET`
+*   `OPENROUTER_API_KEY_ANALYST`, `OPENROUTER_API_KEY_COACH`, `OPENROUTER_API_KEY_NUTRITION` (y sus backups opcionales)
+*   `PORT` (para el backend), `NEXT_PUBLIC_API_URL` (para el frontend)
+
+Para más detalles, consulte el archivo `ARCHITECTURE.md`.
