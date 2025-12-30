@@ -1,0 +1,26 @@
+{
+  "name": "@bitacorafit/shared",
+  "version": "0.0.1",
+  "description": "Shared types, utilities and constants for BitácoraFit",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "lint": "eslint src/**/*.ts",
+    "test": "jest"
+  },
+  "dependencies": {
+    "zod": "^3.22.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "typescript": "^5.0.0",
+    "eslint": "^8.0.0",
+    "jest": "^29.5.0",
+    "@types/jest": "^29.5.0"
+  },
+  "files": [
+    "dist"
+  ]
+}

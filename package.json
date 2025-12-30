@@ -1,0 +1,31 @@
+{
+  "name": "bitacorafit-monorepo",
+  "version": "0.0.1",
+  "private": true,
+  "description": "BitácoraFit - Monorepo con Next.js, NestJS y Supabase",
+  "scripts": {
+    "dev": "pnpm --filter=./apps/* run dev",
+    "build": "pnpm --filter=./apps/* run build",
+    "lint": "pnpm --filter=./apps/* run lint",
+    "typecheck": "tsc --noEmit",
+    "clean": "rm -rf node_modules && rm -rf apps/*/node_modules && rm -rf packages/*/node_modules"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "@types/jest": "^29.5.0",
+    "typescript": "^5.0.0",
+    "eslint": "^8.0.0",
+    "prettier": "^3.0.0",
+    "husky": "^8.0.0",
+    "lint-staged": "^13.0.0"
+  },
+  "pnpm": {
+    "overrides": {
+      "typescript": "^5.0.0"
+    }
+  },
+  "lint-staged": {
+    "*.{ts,tsx,js,jsx}": "eslint --fix",
+    "*.{ts,tsx,js,jsx,json,md}": "prettier --write"
+  }
+}
