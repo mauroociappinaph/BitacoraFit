@@ -1,0 +1,4 @@
+[00:00:01.186] Server  LOG     ✓ Ready in 977ms
+[00:10:24.549] Server  ERROR   Error: ENOENT: no such file or directory, scandir '/Users/mauroociappina/Desktop/BitacoraFit/apps/web/src/app'
+[00:10:24.556] Server  ERROR   ⨯ "unhandledRejection:" Error: ENOENT: no such file or directory, scandir '/Users/mauroociappina/Desktop/BitacoraFit/apps/web/src/app'
+[00:10:24.558] Server  ERROR   ⨯ "unhandledRejection: " Error: ENOENT: no such file or directory, scandir '/Users/mauroociappina/Desktop/BitacoraFit/apps/web/src/app'

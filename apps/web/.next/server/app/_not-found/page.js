@@ -1,0 +1,13 @@
+var R=require("../../chunks/ssr/[turbopack]_runtime.js")("server/app/_not-found/page.js")
+R.c("server/chunks/ssr/Desktop_BitacoraFit_apps_web_bdfe878e._.js")
+R.c("server/chunks/ssr/[root-of-the-server]__ac4cf88e._.js")
+R.c("server/chunks/ssr/c25f3_next_dist_esm_build_templates_app-page_6a5720a9.js")
+R.c("server/chunks/ssr/[root-of-the-server]__20849b53._.js")
+R.c("server/chunks/ssr/[root-of-the-server]__badf1f15._.js")
+R.c("server/chunks/ssr/[root-of-the-server]__e0cf6336._.js")
+R.c("server/chunks/ssr/[root-of-the-server]__b4272027._.js")
+R.c("server/chunks/ssr/c25f3_next_dist_client_components_53e09f60._.js")
+R.c("server/chunks/ssr/c25f3_next_dist_client_components_builtin_forbidden_621fc71a.js")
+R.c("server/chunks/ssr/3d860_BitacoraFit_apps_web__next-internal_server_app__not-found_page_actions_9e624b8c.js")
+R.m(59382)
+module.exports=R.m(59382).exports
