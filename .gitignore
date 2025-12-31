@@ -1,29 +1,23 @@
 # Dependencies
 node_modules/
 pnpm-lock.yaml
-yarn.lock
-package-lock.json
 
 # Build outputs
 dist/
 build/
-.next/
-out/
-coverage/
 
 # Environment variables
 .env
 .env.local
-.env.development
-.env.test
-.env.production
+.env.development.local
+.env.test.local
+.env.production.local
 
 # Logs
 *.log
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
-pnpm-debug.log*
 
 # Runtime data
 pids
@@ -57,13 +51,11 @@ jspm_packages/
 # Yarn Integrity file
 .yarn-integrity
 
-# parcel-bundler cache (https://parceljs.org/)
-.cache
-.parcel-cache
+# dotenv environment variables file
+.env
 
 # next.js build output
 .next
-out
 
 # nuxt.js build output
 .nuxt
@@ -86,14 +78,7 @@ out
 # Stores VSCode versions used for testing VSCode extensions
 .vscode-test
 
-# IDE files
-.vscode/
-.idea/
-*.swp
-*.swo
-*~
-
-# OS files
+# macOS system files
 .DS_Store
 .DS_Store?
 ._*
@@ -102,8 +87,12 @@ out
 ehthumbs.db
 Thumbs.db
 
+# IDE files
+.idea/
+*.swp
+*.swo
+*~
+
 # Temporary files
 tmp/
 temp/
-*.tmp
-*.temp
